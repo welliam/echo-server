@@ -11,7 +11,8 @@ def client(message):
     client = socket.socket(*stream_info[:3])
 
     client.connect(utils.address)
-    client.sendall(message.encode('utf8'))
+    client.sendall(message.encode('utf8') + utils.END)
+
 
     message = utils.recieve_message(client).decode('utf8')
     client.close()

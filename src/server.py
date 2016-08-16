@@ -20,7 +20,7 @@ def server(socket):
         conn, addr = server_socket.accept()
         message = utils.recieve_message(conn)
         print(message)
-        conn.sendall(message)
+        conn.sendall(message + utils.END)
         conn.close()
 
 
