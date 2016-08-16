@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+"""Test server.py and client.py."""
+
 import pytest
 
 CLIENT_MESSAGES = [
@@ -14,5 +16,6 @@ CLIENT_MESSAGES = [
 
 @pytest.mark.parametrize('message', CLIENT_MESSAGES)
 def test_client(message):
+    """Test that the echo server is working correctly."""
     from client import client
     assert client(message) == message

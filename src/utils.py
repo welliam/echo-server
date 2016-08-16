@@ -1,4 +1,9 @@
+# -*- coding: utf-8 -*-
+
+"""Implement various shared tools and constants."""
+
 def recieve_message(conn):
+    """Retrieve a message from a socket connection."""
     buffer_length = 8
     message_complete = False
     message = []
@@ -9,4 +14,4 @@ def recieve_message(conn):
     return ''.join(message)
 
 
-address = ('127.0.0.1', 5000)
+ADDRESS = ('127.0.0.1', 5000)

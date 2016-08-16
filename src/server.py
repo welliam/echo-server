@@ -2,7 +2,6 @@
 
 """Implement an echo server."""
 
-
 import socket
 import utils
 
@@ -14,7 +13,7 @@ def start_server():
         socket.SOCK_STREAM,
         socket.IPPROTO_TCP
     )
-    server_socket.bind(utils.address)
+    server_socket.bind(utils.ADDRESS)
     server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.listen(1)
     return server_socket
