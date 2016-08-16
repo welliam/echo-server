@@ -11,6 +11,7 @@ def start_server():
         socket.IPPROTO_TCP
     )
     server_socket.bind(utils.address)
+    server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     server_socket.listen(1)
     return server_socket
 
