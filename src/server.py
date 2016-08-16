@@ -16,7 +16,7 @@ def start_server():
     return server_socket
 
 
-def server(socket):
+def server(server_socket):
     while True:
         conn, addr = server_socket.accept()
         message = utils.recieve_message(conn)
