@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
+"""Implement an echo server."""
+
+
 import socket
 import utils
 
 
 def start_server():
+    """Return a newly started and listening server socket."""
     server_socket = socket.socket(
         socket.AF_INET,
         socket.SOCK_STREAM,
@@ -17,6 +21,9 @@ def start_server():
 
 
 def server(server_socket):
+    """Repeatedly echoe messages sent to server_socket.
+
+    And log those messages to the terminal."""
     while True:
         conn, addr = server_socket.accept()
         message = utils.recieve_message(conn)
