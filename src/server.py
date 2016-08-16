@@ -19,6 +19,13 @@ def response_ok():
     return build_response(status_line, headers, content)
 
 
+def response_error():
+    status_line = 'HTTP/1.1 500 Internal Server Error'
+    headers = ['Content-Type: text/html; charset=UTF-8']
+    content = 'Internal server error.'
+    return build_response(status_line, headers, content)
+
+
 def start_server():
     server_socket = socket.socket(
         socket.AF_INET,
