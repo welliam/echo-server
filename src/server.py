@@ -4,6 +4,13 @@ import socket
 import utils
 
 
+def response_ok():
+    return """HTTP/1.1 200 OK
+Content-Type: text/html; charset=UTF-8
+
+Hello world!"""
+
+
 def start_server():
     server_socket = socket.socket(
         socket.AF_INET,
