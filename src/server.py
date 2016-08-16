@@ -15,7 +15,7 @@ def build_response(status_line, headers, content):
 def response_ok():
     status_line = "HTTP/1.1 200 OK"
     headers = ['Content-Type: text/html; charset=UTF-8']
-    content = 'Hello world!'
+    content = '<h1>Hello world!</h1>'
     return build_response(status_line, headers, content)
 
 
@@ -43,7 +43,7 @@ def server(server_socket):
         conn, addr = server_socket.accept()
         message = utils.recieve_message(conn)
         print(message)
-        conn.sendall(message)
+        conn.sendall(response_ok())
         conn.close()
 
 
