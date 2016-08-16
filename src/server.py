@@ -4,11 +4,19 @@ import socket
 import utils
 
 
-def response_ok():
-    return """HTTP/1.1 200 OK
-Content-Type: text/html; charset=UTF-8
+def build_response(status_line, headers, content):
+    return '{}\r\n{}\r\n\r\n{}\r\n'.format(
+        status_line,
+        '\r\n'.join(headers),
+        content
+    )
 
-Hello world!"""
+
+def response_ok():
+    status_line = "HTTP/1.1 200 OK"
+    headers = ['Content-Type: text/html; charset=UTF-8']
+    content = 'Hello world!'
+    return build_response(status_line, headers, content)
 
 
 def start_server():
