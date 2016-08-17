@@ -4,6 +4,10 @@ import socket
 import utils
 
 
+class HTTPException(Exception):
+    pass
+
+
 def build_response(status_line, headers, content):
     """Building HTTP protocol-compliant response."""
     return '{}\r\n{}\r\n\r\n{}\r\n'.format(
@@ -27,6 +31,20 @@ def response_error():
     headers = ['Content-Type: text/html; charset=UTF-8']
     content = 'Internal server error.'
     return build_response(status_line, headers, content)
+
+
+def split_head(request):
+    splitted = request.split('\r\n\r\n', 1)
+    return splitted[0], '' if len(splitted) == 1 else splitted
+
+
+def parse_request(request):
+    head, body = split_head(request)
+    head_lines = head.split('\r\n')
+    status_line = head_lines[0]
+    method, uri, http_version = status_line.split()
+    if method != 'GET':
+        raise HTTPException('Method is not GET')
 
 
 def start_server():

@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Test HTTP functions."""
+import pytest
 
 
 def test_build_response():
@@ -34,3 +35,10 @@ def test_response_error_header():
     from server import response_error
     lines = response_error().split('\r\n')
     assert any('content-type:' in line.lower() for line in lines)
+
+
+def test_parse_method():
+    from server import parse_request, HTTPException
+    request = 'HEAD /index HTTP/1.1\r\nHost: 127.0.0.1'
+    with pytest.raises(HTTPException):
+        parse_request(request)
