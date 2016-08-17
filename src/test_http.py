@@ -42,3 +42,17 @@ def test_parse_method():
     request = 'HEAD /index HTTP/1.1\r\nHost: 127.0.0.1'
     with pytest.raises(HTTPException):
         parse_request(request)
+
+
+def test_parse_version():
+    from server import parse_request, HTTPException
+    request = 'GET /index HTTP/1.2\r\nHost: 127.0.0.1'
+    with pytest.raises(HTTPException):
+        parse_request(request)
+
+
+def test_parse_host():
+    from server import parse_request, HTTPException
+    request = 'GET /index HTTP/1.2\r\n'
+    with pytest.raises(HTTPException):
+        parse_request(request)

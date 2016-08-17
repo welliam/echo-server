@@ -38,13 +38,30 @@ def split_head(request):
     return splitted[0], '' if len(splitted) == 1 else splitted
 
 
-def parse_request(request):
-    head, body = split_head(request)
-    head_lines = head.split('\r\n')
-    status_line = head_lines[0]
-    method, uri, http_version = status_line.split()
+def parse_header(head_lines):
+    print(head_lines)
+    return {
+        key.lower(): value for key, value in
+        map(lambda s: s.split(':', 1), head_lines)
+    }
+
+
+def verify_head(method, http_version, headers):
     if method != 'GET':
         raise HTTPException('Method is not GET')
+    if http_version != 'HTTP/1.1':
+        raise HTTPException('HTTP version is not 1.1')
+    if 'host' not in headers:
+        raise HTTPException('Host not in header')
+
+
+def parse_request(request):
+    head, body = split_head(request)
+    head_lines = list(filter(lambda x: x, head.split('\r\n')))
+    status_line = head_lines[0]
+    headers = parse_header(head_lines[1:])
+    method, uri, http_version = status_line.split()
+    verify_head(method, http_version, headers)
 
 
 def start_server():
