@@ -3,11 +3,11 @@
 """Test HTTP functions."""
 
 
-def test_build_response():
-    from server import build_response
-    response = build_response('stats', ['header', 'etc'], 'content')
+def test_format_response():
+    from server import format_response
+    response = format_response('stats', {'header': 'etc', 'h': 'hi'}, 'content')
     assert 'stats\r\n' in response
-    assert 'header\r\n' in response
+    assert 'header: etc\r\n' in response
     assert 'content' in response
     assert '\r\n\r\n' in response
 
