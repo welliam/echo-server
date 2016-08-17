@@ -57,12 +57,15 @@ def combine_continued_headers(headers):
     return result
 
 
-def parse_header(header_lines):
+def parse_headers(header_lines):
     headers = combine_continued_headers(header_lines)
-    return {
-        key.lower(): value for key, value in
-        map(lambda s: s.split(':', 1), headers)
-    }
+    try:
+        return {
+            key.lower(): value for key, value in
+            map(lambda s: s.split(':', 1), headers)
+        }
+    except ValueError:
+        raise HTTPException('Header line has no colon')
 
 
 def verify_head(method, http_version, headers):
@@ -81,7 +84,7 @@ def parse_request(request):
         status_line = head_lines[0]
     except IndexError:
         raise HTTPException('Request is empty')
-    headers = parse_header(head_lines[1:])
+    headers = parse_headers(head_lines[1:])
     try:
         method, uri, http_version = status_line.split()
     except ValueError:

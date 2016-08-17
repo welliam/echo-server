@@ -104,23 +104,29 @@ def test_combined_headers_error():
         combine_continued_headers(headers)
 
 
-def test_header_error():
+def test_combine_header():
     from server import combine_continued_headers
     headers = [
         'hello: wor',
-        ' ld',
+        '    \tld',
         'test: test',
         'test: test'
     ]
     assert 'hello: world' in combine_continued_headers(headers)
 
 
-def test_parse_header():
-    from server import parse_header
-    headers = parse_header([
+def test_parse_headers():
+    from server import parse_headers
+    headers = parse_headers([
         'hello: world',
         'test: ',
         ' test'
     ])
     assert 'test' in headers
     assert 'hello' in headers
+
+
+def test_parse_header_error():
+    from server import parse_headers, HTTPException
+    with pytest.raises(HTTPException):
+        parse_headers(['hello world', 'test: ', ' test'])
