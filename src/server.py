@@ -112,7 +112,12 @@ def server(server_socket):
         conn, addr = server_socket.accept()
         message = utils.recieve_message(conn)
         print(message)
-        conn.sendall(response_ok().encode('utf8'))
+        try:
+            parse_request(message)
+            message = response_ok()
+        except HTTPException:
+            message = response_error()
+        conn.sendall(message.encode('utf8'))
         conn.close()
 
 
