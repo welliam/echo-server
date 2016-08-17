@@ -63,3 +63,10 @@ def test_empty_request():
     request = ''
     with pytest.raises(HTTPException):
         parse_request(request)
+
+
+def test_parse_proper_status():
+    from server import parse_request, HTTPException
+    request = 'GET/index HTTP/1.2\r\n'
+    with pytest.raises(HTTPException):
+        parse_request(request)
