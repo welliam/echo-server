@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 import socket
+import string
 import utils
 
 
@@ -43,10 +44,24 @@ def split_head(request):
     return splitted[0], '' if len(splitted) == 1 else splitted
 
 
-def parse_header(head_lines):
+def combine_continued_headers(headers):
+    result = []
+    for line in headers:
+        if line and line[0] in string.whitespace:
+            try:
+                result[-1] += line.lstrip()
+            except IndexError:
+                raise HTTPException('First header line started with whitespace.')
+        else:
+            result.append(line)
+    return result
+
+
+def parse_header(header_lines):
+    headers = combine_continued_headers(header_lines)
     return {
         key.lower(): value for key, value in
-        map(lambda s: s.split(':', 1), head_lines)
+        map(lambda s: s.split(':', 1), headers)
     }
 
 

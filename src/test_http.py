@@ -79,3 +79,48 @@ def test_parse_proper_status():
     request = 'GET/index HTTP/1.2\r\n'
     with pytest.raises(HTTPException):
         parse_request(request)
+
+
+def test_combined_headers():
+    from server import combine_continued_headers
+    headers = [
+        'hello: wor',
+        ' ld',
+        'test: test',
+        'test: test'
+    ]
+    assert 'hello: world' in combine_continued_headers(headers)
+
+
+def test_combined_headers_error():
+    from server import combine_continued_headers, HTTPException
+    headers = [
+        '  hello: wor',
+        ' ld',
+        'test: test',
+        'test: test'
+    ]
+    with pytest.raises(HTTPException):
+        combine_continued_headers(headers)
+
+
+def test_header_error():
+    from server import combine_continued_headers
+    headers = [
+        'hello: wor',
+        ' ld',
+        'test: test',
+        'test: test'
+    ]
+    assert 'hello: world' in combine_continued_headers(headers)
+
+
+def test_parse_header():
+    from server import parse_header
+    headers = parse_header([
+        'hello: world',
+        'test: ',
+        ' test'
+    ])
+    assert 'test' in headers
+    assert 'hello' in headers
