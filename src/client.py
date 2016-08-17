@@ -6,6 +6,7 @@ import utils
 
 
 def client(message):
+    """Set up client socket and send message"""
     if message == '':
         return ''
     infos = socket.getaddrinfo(*utils.address)
@@ -20,4 +21,5 @@ def client(message):
 
 
 if __name__ == '__main__':
+    """Output received message to stdout"""
     print(client(sys.argv[1]))

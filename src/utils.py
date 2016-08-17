@@ -1,4 +1,5 @@
 def recieve_message(conn):
+    """Retuns message received."""
     buffer_length = 8
     message_complete = False
     message = b''
