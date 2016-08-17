@@ -1,5 +1,5 @@
-# echo-server
-Echo server for Python 401
+# http-server
+HTTP server for Python 401
 
 
 # Instructions

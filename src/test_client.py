@@ -16,6 +16,5 @@ CLIENT_MESSAGES = [
 def test_client(message):
     from client import client
     lines = client(message).split('\r\n')
-    lines = client(message).split('\r\n')
     assert '200 OK' in lines[0]
     assert any('content-type' in line.lower() for line in lines)
