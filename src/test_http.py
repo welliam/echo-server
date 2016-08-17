@@ -12,6 +12,13 @@ def test_format_response():
     assert '\r\n\r\n' in response
 
 
+def test_format_headers():
+    from server import format_headers
+    headers = format_headers({'header': 'etc', 'h': 'hi'})
+    assert 'header: etc' in headers
+    assert 'h: hi' in headers
+
+
 def test_response_ok_status():
     from server import response_ok
     lines = response_ok().split('\r\n')
