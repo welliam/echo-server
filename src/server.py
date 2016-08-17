@@ -6,9 +6,9 @@ import utils
 
 def build_response(status_line, headers, content):
     """Building HTTP protocol-compliant response."""
-    return '{}\r\n{}\r\n\r\n{}\r\n'.format(
+    return u'{}\r\n{}\r\n\r\n{}\r\n'.format(
         status_line,
-        '\r\n'.join(headers),
+        u'\r\n'.join(headers),
         content
     )
 
@@ -16,16 +16,16 @@ def build_response(status_line, headers, content):
 def response_ok():
     """Returns formatted 200 response"""
     status_line = "HTTP/1.1 200 OK"
-    headers = ['Content-Type: text/html; charset=UTF-8']
-    content = '<h1>Hello world!</h1>'
+    headers = [u'Content-Type: text/html; charset=UTF-8']
+    content = u'<h1>Hello world!</h1>'
     return build_response(status_line, headers, content)
 
 
 def response_error():
     """Returns formatted 500 response"""
-    status_line = 'HTTP/1.1 500 Internal Server Error'
-    headers = ['Content-Type: text/html; charset=UTF-8']
-    content = 'Internal server error.'
+    status_line = u'HTTP/1.1 500 Internal Server Error'
+    headers = [u'Content-Type: text/html; charset=UTF-8']
+    content = u'Internal server error.'
     return build_response(status_line, headers, content)
 
 
