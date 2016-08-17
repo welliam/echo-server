@@ -56,3 +56,10 @@ def test_parse_host():
     request = 'GET /index HTTP/1.2\r\n'
     with pytest.raises(HTTPException):
         parse_request(request)
+
+
+def test_empty_request():
+    from server import parse_request, HTTPException
+    request = ''
+    with pytest.raises(HTTPException):
+        parse_request(request)

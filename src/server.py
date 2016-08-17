@@ -39,7 +39,6 @@ def split_head(request):
 
 
 def parse_header(head_lines):
-    print(head_lines)
     return {
         key.lower(): value for key, value in
         map(lambda s: s.split(':', 1), head_lines)
@@ -58,9 +57,15 @@ def verify_head(method, http_version, headers):
 def parse_request(request):
     head, body = split_head(request)
     head_lines = list(filter(lambda x: x, head.split('\r\n')))
-    status_line = head_lines[0]
+    try:
+        status_line = head_lines[0]
+    except IndexError:
+        raise HTTPException('Request is empty')
     headers = parse_header(head_lines[1:])
-    method, uri, http_version = status_line.split()
+    try:
+        method, uri, http_version = status_line.split()
+    except ValueError:
+        raise HTTPException('Invalid status line')
     verify_head(method, http_version, headers)
 
 
