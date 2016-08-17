@@ -4,6 +4,9 @@
 import pytest
 
 
+URIS = ['index', '/', '/foo/bar.php', '/test/test']
+
+
 def test_format_response():
     from server import format_response
     response = format_response(
@@ -130,3 +133,10 @@ def test_parse_header_error():
     from server import parse_headers, HTTPException
     with pytest.raises(HTTPException):
         parse_headers(['hello world', 'test: ', ' test'])
+
+
+@pytest.mark.parametrize('uri', URIS)
+def test_parse_uri(uri):
+    from server import parse_request
+    request = 'GET {} HTTP/1.1\r\nHost: www.example.org\r\n'.format(uri)
+    assert parse_request(request) == uri

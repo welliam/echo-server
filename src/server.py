@@ -90,6 +90,7 @@ def parse_request(request):
     except ValueError:
         raise HTTPException('Invalid status line')
     verify_head(method, http_version, headers)
+    return uri
 
 
 def start_server():
