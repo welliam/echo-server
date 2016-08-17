@@ -20,7 +20,7 @@ def format_headers(headers):
 
 def response_ok():
     """Returns formatted 200 response"""
-    status_line = "HTTP/1.1 200 OK"
+    status_line = u'HTTP/1.1 200 OK'
     headers = {u'Content-Type': 'text/html; charset=UTF-8'}
     content = u'<h1>Hello world!</h1>'
     return format_response(status_line, headers, content)
