@@ -44,5 +44,5 @@ def test_client_error(message):
 def test_server_error(message):
     from client import client
     lines = client(message).split('\r\n')
-    assert '500' in lines[0]
+    assert '400' in lines[0] or '405' in lines[0]
     assert any('content-type' in line.lower() for line in lines)

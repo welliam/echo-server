@@ -8,13 +8,12 @@ import utils
 class HTTPException(Exception):
     """Custom exception class"""
     def __init__(self, code, reason):
-        super(HTTPException, self).__init__(reason)
         self.http_error = code
+        self.message = reason
 
 
-HTTP_CLIENT_ERROR = '400 Bad Request'
-
-HTTP_SERVER_ERROR = '500 Internal Server Error'
+HTTP_BAD_REQUEST = '400 Bad Request'
+HTTP_UNSUPPORTED_METHOD = '405 Method not allowed'
 
 
 def format_response(status_line, headers, content):
@@ -62,7 +61,7 @@ def combine_continued_headers(headers):
                 result[-1] += line.lstrip()
             except IndexError:
                 raise HTTPException(
-                    HTTP_CLIENT_ERROR,
+                    HTTP_BAD_REQUEST,
                     'First header line started with whitespace.'
                 )
         else:
@@ -80,7 +79,7 @@ def parse_headers(header_lines):
         }
     except ValueError:
         raise HTTPException(
-            HTTP_CLIENT_ERROR,
+            HTTP_BAD_REQUEST,
             'Header line has no colon'
         )
 
@@ -88,11 +87,11 @@ def parse_headers(header_lines):
 def verify_head(method, http_version, headers):
     """Raise exception based on error."""
     if method != 'GET':
-        raise HTTPException(HTTP_SERVER_ERROR, 'Method is not GET')
+        raise HTTPException(HTTP_UNSUPPORTED_METHOD, 'Method is not GET')
     if http_version != 'HTTP/1.1':
-        raise HTTPException(HTTP_SERVER_ERROR, 'HTTP version is not 1.1')
+        raise HTTPException(HTTP_BAD_REQUEST, 'HTTP version is not 1.1')
     if 'host' not in headers:
-        raise HTTPException(HTTP_CLIENT_ERROR, 'Host not in header')
+        raise HTTPException(HTTP_BAD_REQUEST, 'Host not in header')
 
 
 def parse_request(request):
@@ -102,12 +101,12 @@ def parse_request(request):
     try:
         status_line = head_lines[0]
     except IndexError:
-        raise HTTPException(HTTP_CLIENT_ERROR, 'Request is empty')
+        raise HTTPException(HTTP_BAD_REQUEST, 'Request is empty')
     headers = parse_headers(head_lines[1:])
     try:
         method, uri, http_version = status_line.split()
     except ValueError:
-        raise HTTPException(HTTP_CLIENT_ERROR, 'Invalid status line')
+        raise HTTPException(HTTP_BAD_REQUEST, 'Invalid status line')
     verify_head(method, http_version, headers)
     return uri
 
@@ -132,7 +131,7 @@ def server(server_socket):
         message = utils.recieve_message(conn)
         print(message)
         try:
-            parse_request(message)
+            parse_request(message.decode())
             message = response_ok()
         except HTTPException as e:
             message = response_error(e.http_error, e.message)
