@@ -31,11 +31,11 @@ def response_ok():
     return format_response(status_line, headers, content)
 
 
-def response_error():
-    """Returns formatted 500 response"""
-    status_line = u'HTTP/1.1 500 Internal Server Error'
+def response_error(code, reason):
+    """Returns formatted error response"""
+    status_line = u'HTTP/1.1 {}'.format(code)
     headers = {u'Content-Type': 'text/html; charset=UTF-8'}
-    content = u'Internal server error.'
+    content = u'<h1>{}</h1>'.format(reason)
     return format_response(status_line, headers, content)
 
 
@@ -115,8 +115,9 @@ def server(server_socket):
         try:
             parse_request(message)
             message = response_ok()
-        except HTTPException:
-            message = response_error()
+        except HTTPException as e:
+            message = response_error(u'400 Bad Request', e.message)
+        print('responding with', message.encode('utf8'))
         conn.sendall(message.encode('utf8'))
         conn.close()
 
