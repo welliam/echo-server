@@ -147,18 +147,19 @@ def path_content(path):
 
 
 def generate_headers(content, mime_type):
-    return {
-        'Content-Type': '{}; {}'.format(*mime_type),
+    mime, encoding = mime_type
+    headers = {
         'Content-Length': len(content)
     }
+    if mime:
+        headers['Content-Type'] = mime
+        if encoding:
+            headers['Content-Type'] += '; charset={}'.format(encoding)
+    return headers
 
 
 def generate_headers_from_path(path, content):
-    path_type, encoding = mimetypes.guess_type(path)
-    return generate_headers(content, (
-        path_type or 'text/plain',
-        encoding or 'charset=UTF-8'
-    ))
+    return generate_headers(content, mimetypes.guess_type(path))
 
 
 def start_server():

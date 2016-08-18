@@ -202,3 +202,11 @@ def test_generate_headers(path, content):
     headers = generate_headers(path, content)
     assert 'Content-Type' in headers
     assert 'Content-Length' in headers
+
+
+@pytest.mark.parametrize('path, content', GENERATE_HEADERS_TABLE)
+def test_generate_headers_from_path(path):
+    from server import generate_headers
+    headers = generate_headers(path, content)
+    assert 'Content-Type' in headers
+    assert 'Content-Length' in headers
