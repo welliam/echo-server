@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import socket
 import string
 from gevent.server import StreamServer
@@ -19,7 +20,7 @@ HTTP_UNSUPPORTED_METHOD = '405 Method not allowed'
 
 def format_response(status_line, headers, content):
     """Building HTTP protocol-compliant response."""
-    return u'{}\r\n{}\r\n\r\n{}\r\n'.format(
+    return '{}\r\n{}\r\n\r\n{}\r\n'.format(
         status_line,
         format_headers(headers),
         content
@@ -28,22 +29,22 @@ def format_response(status_line, headers, content):
 
 def format_headers(headers):
     """Builds headers as a string from headers dict."""
-    return u'\r\n'.join('{}: {}'.format(k, headers[k]) for k in headers)
+    return '\r\n'.join('{}: {}'.format(k, headers[k]) for k in headers)
 
 
 def response_ok():
     """Returns formatted 200 response."""
-    status_line = u'HTTP/1.1 200 OK'
-    headers = {u'Content-Type': 'text/html; charset=UTF-8'}
-    content = u'<h1>Hello world!</h1>'
+    status_line = 'HTTP/1.1 200 OK'
+    headers = {'Content-Type': 'text/html; charset=UTF-8'}
+    content = '<h1>Hello world!</h1>'
     return format_response(status_line, headers, content)
 
 
 def response_error(code, reason):
     """Returns formatted error response."""
-    status_line = u'HTTP/1.1 {}'.format(code)
-    headers = {u'Content-Type': 'text/html; charset=UTF-8'}
-    content = u'<h1>{}</h1>'.format(reason)
+    status_line = 'HTTP/1.1 {}'.format(code)
+    headers = {'Content-Type': 'text/html; charset=UTF-8'}
+    content = '<h1>{}</h1>'.format(reason)
     return format_response(status_line, headers, content)
 
 
