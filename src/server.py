@@ -3,11 +3,12 @@
 from __future__ import unicode_literals
 import socket
 import string
-from gevent.server import StreamServer
 import utils
 import io
 import os
 import cgi
+import mimetypes
+from gevent.server import StreamServer
 
 
 class HTTPException(Exception):
@@ -47,8 +48,8 @@ def response_ok():
 def response_error(code, reason):
     """Returns formatted error response."""
     status_line = 'HTTP/1.1 {}'.format(code)
-    headers = {'Content-Type': 'text/html; charset=UTF-8'}
     content = '<h1>{}</h1>'.format(reason)
+    headers = generate_headers(content, ('text/html', 'charset=UTF-8'))
     return format_response(status_line, headers, content)
 
 
@@ -143,6 +144,21 @@ def path_content(path):
         return io.open(path, 'rb').read()
     else:
         raise HTTPException(HTTP_NOT_FOUND, 'File not found')
+
+
+def generate_headers(content, mime_type):
+    return {
+        'Content-Type': '{}; {}'.format(*mime_type),
+        'Content-Length': len(content)
+    }
+
+
+def generate_headers_from_path(path, content):
+    path_type, encoding = mimetypes.guess_type(path)
+    return generate_headers(content, (
+        path_type or 'text/plain',
+        encoding or 'charset=UTF-8'
+    ))
 
 
 def start_server():
