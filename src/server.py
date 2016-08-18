@@ -6,6 +6,7 @@ import utils
 
 
 class HTTPException(Exception):
+    """Custom exception class"""
     def __init__(self, code, reason):
         super(HTTPException, self).__init__(reason)
         self.http_error = code
@@ -31,7 +32,7 @@ def format_headers(headers):
 
 
 def response_ok():
-    """Returns formatted 200 response"""
+    """Returns formatted 200 response."""
     status_line = u'HTTP/1.1 200 OK'
     headers = {u'Content-Type': 'text/html; charset=UTF-8'}
     content = u'<h1>Hello world!</h1>'
@@ -39,7 +40,7 @@ def response_ok():
 
 
 def response_error(code, reason):
-    """Returns formatted error response"""
+    """Returns formatted error response."""
     status_line = u'HTTP/1.1 {}'.format(code)
     headers = {u'Content-Type': 'text/html; charset=UTF-8'}
     content = u'<h1>{}</h1>'.format(reason)
@@ -47,11 +48,13 @@ def response_error(code, reason):
 
 
 def split_head(request):
+    """Split headers line from body."""
     splitted = request.split('\r\n\r\n', 1)
     return splitted[0], '' if len(splitted) == 1 else splitted
 
 
 def combine_continued_headers(headers):
+    """Fix for new lines that start with whitespace."""
     result = []
     for line in headers:
         if line and line[0] in string.whitespace:
@@ -68,6 +71,7 @@ def combine_continued_headers(headers):
 
 
 def parse_headers(header_lines):
+    """Parse headers into a dictionary, split at colon."""
     headers = combine_continued_headers(header_lines)
     try:
         return {
@@ -82,6 +86,7 @@ def parse_headers(header_lines):
 
 
 def verify_head(method, http_version, headers):
+    """Raise exception based on error."""
     if method != 'GET':
         raise HTTPException(HTTP_SERVER_ERROR, 'Method is not GET')
     if http_version != 'HTTP/1.1':
@@ -91,6 +96,7 @@ def verify_head(method, http_version, headers):
 
 
 def parse_request(request):
+    """Parse incoming request, return uri requested."""
     head, body = split_head(request)
     head_lines = list(filter(lambda x: x, head.split('\r\n')))
     try:
