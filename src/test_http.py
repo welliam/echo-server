@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 """Test HTTP functions."""
+from __future__ import unicode_literals
 import pytest
 
 

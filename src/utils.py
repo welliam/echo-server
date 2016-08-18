@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+
+from __future__ import unicode_literals
+
 def recieve_message(conn):
     """Retuns message received."""
     buffer_length = 8

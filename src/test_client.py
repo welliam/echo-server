@@ -1,26 +1,27 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import unicode_literals
 import pytest
 
 
 CLIENT_MESSAGES = [
-    u'GET / HTTP/1.1\r\nHost: foo.bar',
-    u'GET / HTTP/1.1\r\nHost:\r\n   foo.bar',
-    u'GET / HTTP/1.1\r\nHost: foo.bar\r\n\r\nhello world!\r\n\r\nhi!',
+    'GET / HTTP/1.1\r\nHost: foo.bar',
+    'GET / HTTP/1.1\r\nHost:\r\n   foo.bar',
+    'GET / HTTP/1.1\r\nHost: foo.bar\r\n\r\nhello world!\r\n\r\nhi!',
 ]
 
 
 CLIENT_ERROR_MESSAGES = [
-    u'hello',
-    u'GET / HTTP/1.1\r\n',
-    u'GET / HTTP/1.1\r\nHost foo.bar\r\n\r\n',
-    u'GET / HTTP/1.1\r\nHost: foo.bar\r\nhello hello hello',
+    'hello',
+    'GET / HTTP/1.1\r\n',
+    'GET / HTTP/1.1\r\nHost foo.bar\r\n\r\n',
+    'GET / HTTP/1.1\r\nHost: foo.bar\r\nhello hello hello',
 ]
 
 
 SERVER_ERROR_MESSAGES = [
-    u'GET / HTTP/1.0\r\nHost: foo.bar',
-    u'HEAD / HTTP/1.1\r\nHost:\r\n   foo.bar',
+    'GET / HTTP/1.0\r\nHost: foo.bar',
+    'HEAD / HTTP/1.1\r\nHost:\r\n   foo.bar',
 ]
 
 
