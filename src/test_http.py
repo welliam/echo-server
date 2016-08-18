@@ -8,6 +8,18 @@ import pytest
 URIS = ['index', '/', '/foo/bar.php', '/test/test']
 
 
+PATH_TABLE = [
+    ('..', False),
+    ('//', False),
+    ('~', False),
+    ('~/Desktop/file.txt', False),
+    ('~//..file.txt', False),
+    ('../../test.txt', False),
+    ('file.txt', True),
+    ('/about', True)
+]
+
+
 def test_format_response():
     from server import format_response
     response = format_response(
@@ -141,3 +153,9 @@ def test_parse_uri(uri):
     from server import parse_request
     request = 'GET {} HTTP/1.1\r\nHost: www.example.org\r\n'.format(uri)
     assert parse_request(request) == uri
+
+
+@pytest.mark.parametrize('path, result', PATH_TABLE)
+def test_valid_path(path, result):
+    from server import valid_path
+    assert valid_path(path) == result

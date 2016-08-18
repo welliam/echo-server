@@ -5,6 +5,7 @@ import socket
 import string
 from gevent.server import StreamServer
 import utils
+import io
 
 
 class HTTPException(Exception):
@@ -111,6 +112,16 @@ def parse_request(request):
         raise HTTPException(HTTP_BAD_REQUEST, 'Invalid status line')
     verify_head(method, http_version, headers)
     return uri
+
+
+def valid_path(path):
+    if '~' == path[0]:
+        return False
+    if '//' in path:
+        return False
+    if '..' in path:
+        return False
+    return True
 
 
 def start_server():
