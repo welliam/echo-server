@@ -23,6 +23,13 @@ PATH_TABLE = [
 HTML_TABLE = ['.cache', '.git', '.gitignore', '.tox', 'LICENSE']
 
 
+GENERATE_HEADERS_TABLE = [
+    ('file.txt', b'this is some content'),
+    ('test/test.txt', b'this is some content'),
+    ('dir/dir/dir/file.png', b'this is some content')
+]
+
+
 def test_format_response():
     from server import format_response
     response = format_response(
@@ -187,3 +194,11 @@ def test_path_content_error():
     from server import path_content, HTTPException
     with pytest.raises(HTTPException):
         path_content('non-existent-path')
+
+
+@pytest.mark.parametrize('path, content', GENERATE_HEADERS_TABLE)
+def test_generate_headers(path, content):
+    from server import generate_headers
+    headers = generate_headers(path, content)
+    assert 'Content-Type' in headers
+    assert 'Content-Length' in headers
