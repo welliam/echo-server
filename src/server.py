@@ -130,11 +130,11 @@ def handle_connection(conn, addr):
     print(message)
     try:
         parse_request(message.decode())
-        message = response_ok()
+        response = response_ok()
     except HTTPException as e:
-        message = response_error(e.http_error, e.message)
-    print('responding with', message.encode('utf8'))
-    conn.sendall(message.encode('utf8'))
+        response = response_error(e.http_error, e.message)
+    print('responding with', response.encode('utf8'))
+    conn.sendall(response.encode('utf8'))
     conn.close()
 
 
