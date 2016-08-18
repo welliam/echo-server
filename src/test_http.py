@@ -171,3 +171,13 @@ def test_format_dir(paths):
     assert all(path in result for path in paths)
     assert result.startswith('<ul>')
     assert result.endswith('</ul>')
+
+
+def test_path_content():
+    from server import path_content
+    assert path_content('./test/temp_file.txt') == b'12345678\n'
+
+
+def test_path_content_dir():
+    from server import path_content
+    assert 'temp_file.txt' in path_content('./test/')

@@ -18,6 +18,7 @@ class HTTPException(Exception):
 
 
 HTTP_BAD_REQUEST = '400 Bad Request'
+HTTP_NOT_FOUND = '404 Not Found'
 HTTP_UNSUPPORTED_METHOD = '405 Method not allowed'
 
 
@@ -133,6 +134,15 @@ def list_dir(path):
 def format_dir(paths):
     html_list = ['<li>{}</li>'.format(cgi.escape(f)) for f in paths]
     return '<ul>{}</ul>'.format(''.join(html_list))
+
+
+def path_content(path):
+    if os.path.isdir(path):
+        return list_dir(path)
+    elif os.path.isfile(path):
+        return io.open(path, 'rb').read()
+    else:
+        raise HTTPException(HTTP_NOT_FOUND, 'File not found')
 
 
 def start_server():
