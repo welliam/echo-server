@@ -181,3 +181,9 @@ def test_path_content():
 def test_path_content_dir():
     from server import path_content
     assert 'temp_file.txt' in path_content('./test/')
+
+
+def test_path_content_error():
+    from server import path_content, HTTPException
+    with pytest.raises(HTTPException):
+        path_content('non-existent-path')
