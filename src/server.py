@@ -2,6 +2,7 @@
 
 import socket
 import string
+from gevent.server import StreamServer
 import utils
 
 
@@ -124,25 +125,23 @@ def start_server():
     return server_socket
 
 
-def server(server_socket):
+def handle_connection(conn, addr):
+    message = utils.recieve_message(conn)
+    print(message)
+    try:
+        parse_request(message.decode())
+        message = response_ok()
+    except HTTPException as e:
+        message = response_error(e.http_error, e.message)
+    print('responding with', message.encode('utf8'))
+    conn.sendall(message.encode('utf8'))
+    conn.close()
+
+
+def server():
     """Set up client socket"""
-    while True:
-        conn, addr = server_socket.accept()
-        message = utils.recieve_message(conn)
-        print(message)
-        try:
-            parse_request(message.decode())
-            message = response_ok()
-        except HTTPException as e:
-            message = response_error(e.http_error, e.message)
-        print('responding with', message.encode('utf8'))
-        conn.sendall(message.encode('utf8'))
-        conn.close()
+    StreamServer(utils.address, handle_connection).serve_forever()
 
 
 if __name__ == '__main__':
-    server_socket = start_server()
-    try:
-        server(server_socket)
-    except KeyboardInterrupt:
-        server_socket.close()
+    server()
