@@ -6,6 +6,8 @@ import string
 from gevent.server import StreamServer
 import utils
 import io
+import os
+import cgi
 
 
 class HTTPException(Exception):
@@ -122,6 +124,15 @@ def valid_path(path):
     if '..' in path:
         return False
     return True
+
+
+def list_dir(path):
+    return format_dir(os.listdir(path))
+
+
+def format_dir(paths):
+    html_list = ['<li>{}</li>'.format(cgi.escape(f)) for f in paths]
+    return '<ul>{}</ul>'.format(''.join(html_list))
 
 
 def start_server():

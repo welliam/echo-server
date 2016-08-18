@@ -20,6 +20,9 @@ PATH_TABLE = [
 ]
 
 
+HTML_TABLE = ['.cache', '.git', '.gitignore', '.tox', 'LICENSE']
+
+
 def test_format_response():
     from server import format_response
     response = format_response(
@@ -159,3 +162,12 @@ def test_parse_uri(uri):
 def test_valid_path(path, result):
     from server import valid_path
     assert valid_path(path) == result
+
+
+@pytest.mark.parametrize('paths', HTML_TABLE)
+def test_format_dir(paths):
+    from server import format_dir
+    result = format_dir(paths)
+    assert all(path in result for path in paths)
+    assert result.startswith('<ul>')
+    assert result.endswith('</ul>')
