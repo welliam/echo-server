@@ -11,6 +11,6 @@ setup(
     license="MIT",
     py_modules=["echo_server"],
     package_dir={'': 'src'},
-    install_requires=[],
+    install_requires=['gevent'],
     extras_require={'test': ['pytest', 'pytest-watch', 'tox']},
 )
