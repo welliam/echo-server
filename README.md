@@ -5,7 +5,7 @@ HTTP server for Python 401
 # Instructions
 Clone this repo, start create new virtual env, install required plugins using:
 ```
-pip install .[test]]
+pip install .[test]
 ```
 
 Start server
