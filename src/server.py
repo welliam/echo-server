@@ -134,6 +134,8 @@ def list_dir(path):
 def format_dir(paths):
     html_list = [
         '<li><a href="{link}">{link}</a></li>'
+        .format(link=cgi.escape(f)) if '.' in f
+        else '<li><a href="{link}/">{link}</a></li>'
         .format(link=cgi.escape(f)) for f in paths
     ]
     return '<ul>{}</ul>'.format(''.join(html_list))
