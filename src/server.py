@@ -123,15 +123,18 @@ def parse_request(request):
 
 
 def verify_path(path):
+    """Sanitize path"""
     if '~' == path[0] or '//' in path or '..' in path:
         raise HTTPException(HTTP_NOT_FOUND, 'File not found')
 
 
 def list_dir(path):
+    """Get files and dirs in dir"""
     return format_dir(os.listdir(path))
 
 
 def format_dir(paths):
+    """Format to html"""
     html_list = [
         '<li><a href="{link}">{link}</a></li>'
         .format(link=cgi.escape(f)) if '.' in f
@@ -142,6 +145,7 @@ def format_dir(paths):
 
 
 def path_content(path):
+    """Check if dir or file"""
     if os.path.isdir(path):
         return list_dir(path).encode('utf8')
     elif os.path.isfile(path):
@@ -151,6 +155,7 @@ def path_content(path):
 
 
 def generate_headers(content, mime_type):
+    """Input content length, type, encoding to header"""
     mime, encoding = mime_type
     headers = {
         'Content-Length': len(content)
@@ -165,6 +170,7 @@ def generate_headers(content, mime_type):
 
 
 def generate_headers_from_path(path, content):
+    """Return proper formatted header from requested path"""
     return generate_headers(content, mimetypes.guess_type(path))
 
 
@@ -182,6 +188,7 @@ def start_server():
 
 
 def handle_connection(conn, addr):
+    """Determines what to send back as response."""
     message = utils.recieve_message(conn)
     try:
         uri = parse_request(message.decode())

@@ -3,7 +3,6 @@
 """Test HTTP functions."""
 from __future__ import unicode_literals
 import pytest
-import io
 
 
 URIS = ['index', '/', '/foo/bar.php', '/test/test']
@@ -36,11 +35,10 @@ GENERATE_HEADERS_PATHS_TABLE = [
 def test_format_response():
     from server import format_response
     response = format_response(
-        'stats', {'header': 'etc', 'h': 'hi'}, 'content'
+        'stats', {'header': 'etc', 'h': 'hi'}
     )
     assert 'stats\r\n' in response
     assert 'header: etc\r\n' in response
-    assert 'content' in response
     assert '\r\n\r\n' in response
 
 
@@ -53,31 +51,31 @@ def test_format_headers():
 
 def test_response_ok_status():
     from server import response_ok
-    lines = response_ok('sample.txt').split('\r\n')
+    lines = response_ok('/sample.txt')[0].split('\r\n')
     assert '200 OK' in lines[0]
 
 
 def test_response_ok_header():
     from server import response_ok
-    lines = response_ok('sample.txt').split('\r\n')
+    lines = response_ok('/sample.txt')[0].split('\r\n')
     assert any('content-type:' in line.lower() for line in lines)
 
 
 def test_response_ok_contents():
     from server import response_ok
-    content = response_ok('sample.txt').split('\r\n\r\n', 1)[1]
-    assert 'This is a very simple text file.' in content
+    content = response_ok('/sample.txt')[1]
+    assert b'This is a very simple text file.' in content
 
 
 def test_response_error_status():
     from server import response_error
-    lines = response_error('500 Internal Server Error', 'hi').split('\r\n')
+    lines = response_error('500 Internal Server Error', 'hi')[0].split('\r\n')
     assert '500 Internal Server Error' in lines[0]
 
 
 def test_response_error_header():
     from server import response_error
-    lines = response_error('500 Internal Server Error', 'hi').split('\r\n')
+    lines = response_error('500 Internal Server Error', 'hi')[0].split('\r\n')
     assert any('content-type:' in line.lower() for line in lines)
 
 
@@ -201,7 +199,7 @@ def test_path_content():
 
 def test_path_content_dir():
     from server import path_content
-    assert 'temp_file.txt' in path_content('./test/')
+    assert b'temp_file.txt' in path_content('./test/')
 
 
 def test_path_content_error():
