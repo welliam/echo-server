@@ -26,12 +26,12 @@ HTTP_NOT_FOUND = '404 Not Found'
 HTTP_UNSUPPORTED_METHOD = '405 Method not allowed'
 
 
-def format_response(status_line, headers, content):
+def format_response(status_line, headers):
     """Building HTTP protocol-compliant response."""
     return '{}\r\n{}\r\n\r\n'.format(
         status_line,
         format_headers(headers)
-    ), content
+    )
 
 
 def format_headers(headers):
@@ -46,7 +46,7 @@ def response_ok(uri):
     status_line = 'HTTP/1.1 200 OK'
     content = path_content(path)
     headers = generate_headers_from_path(path, content)
-    return format_response(status_line, headers, content)
+    return format_response(status_line, headers), content
 
 
 def response_error(code, reason):
@@ -54,7 +54,7 @@ def response_error(code, reason):
     status_line = 'HTTP/1.1 {}'.format(code)
     content = '<h1>{}</h1>'.format(reason)
     headers = generate_headers(content, ('text/html', 'charset=UTF-8'))
-    return format_response(status_line, headers, content.decode('utf8'))
+    return format_response(status_line, headers), content.encode('utf8')
 
 
 def split_head(request):
@@ -132,13 +132,16 @@ def list_dir(path):
 
 
 def format_dir(paths):
-    html_list = ['<li>{}</li>'.format(cgi.escape(f)) for f in paths]
+    html_list = [
+        '<li><a href="{link}">{link}</a></li>'
+        .format(link=cgi.escape(f)) for f in paths
+    ]
     return '<ul>{}</ul>'.format(''.join(html_list))
 
 
 def path_content(path):
     if os.path.isdir(path):
-        return list_dir(path)
+        return list_dir(path).encode('utf8')
     elif os.path.isfile(path):
         return io.open(path, 'rb').read()
     else:
@@ -146,8 +149,6 @@ def path_content(path):
 
 
 def generate_headers(content, mime_type):
-    print(content)
-    print(mime_type)
     mime, encoding = mime_type
     headers = {
         'Content-Length': len(content)
@@ -156,6 +157,8 @@ def generate_headers(content, mime_type):
         headers['Content-Type'] = mime
         if encoding:
             headers['Content-Type'] += '; charset={}'.format(encoding)
+    else:
+        headers['Content-Type'] = 'text/html'
     return headers
 
 
@@ -178,14 +181,12 @@ def start_server():
 
 def handle_connection(conn, addr):
     message = utils.recieve_message(conn)
-    print(message)
     try:
         uri = parse_request(message.decode())
         header, content = response_ok(uri)
-        print(type(header), isinstance(content, bytes))
     except HTTPException as e:
         header, content = response_error(e.http_error, e.message)
-    print('responding with', header.encode('utf8'))
+    print(header.encode('utf8') + content)
     conn.sendall(header.encode('utf8') + content)
     conn.close()
 
