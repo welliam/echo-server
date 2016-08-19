@@ -11,6 +11,9 @@ import mimetypes
 from gevent.server import StreamServer
 
 
+ROOT_DIR = '../webroot/'
+
+
 class HTTPException(Exception):
     """Custom exception class"""
     def __init__(self, code, reason):
@@ -37,11 +40,13 @@ def format_headers(headers):
     return '\r\n'.join('{}: {}'.format(k, headers[k]) for k in headers)
 
 
-def response_ok():
+def response_ok(uri):
     """Returns formatted 200 response."""
+    verify_path(uri)
+    path = '{}{}'.format(ROOT_DIR, uri)
     status_line = 'HTTP/1.1 200 OK'
-    headers = {'Content-Type': 'text/html; charset=UTF-8'}
-    content = '<h1>Hello world!</h1>'
+    content = path_content(path)
+    headers = generate_headers_from_path(path, content)
     return format_response(status_line, headers, content)
 
 
@@ -118,14 +123,9 @@ def parse_request(request):
     return uri
 
 
-def valid_path(path):
-    if '~' == path[0]:
-        return False
-    if '//' in path:
-        return False
-    if '..' in path:
-        return False
-    return True
+def verify_path(path):
+    if '~' == path[0] or '//' in path or '..' in path:
+        raise HTTPException(HTTP_NOT_FOUND, 'File not found')
 
 
 def list_dir(path):
@@ -147,6 +147,8 @@ def path_content(path):
 
 
 def generate_headers(content, mime_type):
+    print(content)
+    print(mime_type)
     mime, encoding = mime_type
     headers = {
         'Content-Length': len(content)
@@ -179,8 +181,8 @@ def handle_connection(conn, addr):
     message = utils.recieve_message(conn)
     print(message)
     try:
-        parse_request(message.decode())
-        response = response_ok()
+        uri = parse_request(message.decode())
+        response = response_ok(uri)
     except HTTPException as e:
         response = response_error(e.http_error, e.message)
     print('responding with', response.encode('utf8'))

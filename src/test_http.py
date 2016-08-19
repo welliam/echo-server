@@ -3,6 +3,7 @@
 """Test HTTP functions."""
 from __future__ import unicode_literals
 import pytest
+import io
 
 
 URIS = ['index', '/', '/foo/bar.php', '/test/test']
@@ -23,7 +24,9 @@ PATH_TABLE = [
 HTML_TABLE = ['.cache', '.git', '.gitignore', '.tox', 'LICENSE']
 
 
-GENERATE_HEADERS_TABLE = [
+GENERATE_HEADERS_TABLE = ['file.txt', 'test/test.txt', 'dir/dir/dir/file.png']
+
+GENERATE_HEADERS_PATHS_TABLE = [
     ('file.txt', b'this is some content'),
     ('test/test.txt', b'this is some content'),
     ('dir/dir/dir/file.png', b'this is some content')
@@ -50,14 +53,20 @@ def test_format_headers():
 
 def test_response_ok_status():
     from server import response_ok
-    lines = response_ok().split('\r\n')
+    lines = response_ok('sample.txt').split('\r\n')
     assert '200 OK' in lines[0]
 
 
 def test_response_ok_header():
     from server import response_ok
-    lines = response_ok().split('\r\n')
+    lines = response_ok('sample.txt').split('\r\n')
     assert any('content-type:' in line.lower() for line in lines)
+
+
+def test_response_ok_contents():
+    from server import response_ok
+    content = response_ok('sample.txt').split('\r\n\r\n', 1)[1]
+    assert 'This is a very simple text file.' in content
 
 
 def test_response_error_status():
@@ -165,10 +174,15 @@ def test_parse_uri(uri):
     assert parse_request(request) == uri
 
 
-@pytest.mark.parametrize('path, result', PATH_TABLE)
-def test_valid_path(path, result):
-    from server import valid_path
-    assert valid_path(path) == result
+@pytest.mark.parametrize('path, isvalid', PATH_TABLE)
+def test_valid_path(path, isvalid):
+    from server import verify_path, HTTPException
+    if isvalid:
+        verify_path(path)
+        assert True
+    else:
+        with pytest.raises(HTTPException):
+            verify_path(path)
 
 
 @pytest.mark.parametrize('paths', HTML_TABLE)
@@ -196,17 +210,17 @@ def test_path_content_error():
         path_content('non-existent-path')
 
 
-@pytest.mark.parametrize('path, content', GENERATE_HEADERS_TABLE)
-def test_generate_headers(path, content):
+@pytest.mark.parametrize('path', GENERATE_HEADERS_TABLE)
+def test_generate_headers(path):
     from server import generate_headers
-    headers = generate_headers(path, content)
+    headers = generate_headers(path, ('text/plain', None))
     assert 'Content-Type' in headers
     assert 'Content-Length' in headers
 
 
-@pytest.mark.parametrize('path, content', GENERATE_HEADERS_TABLE)
-def test_generate_headers_from_path(path):
-    from server import generate_headers
-    headers = generate_headers(path, content)
+@pytest.mark.parametrize('path, contents', GENERATE_HEADERS_PATHS_TABLE)
+def test_generate_headers_from_path(path, contents):
+    from server import generate_headers_from_path
+    headers = generate_headers_from_path(path, contents)
     assert 'Content-Type' in headers
     assert 'Content-Length' in headers
