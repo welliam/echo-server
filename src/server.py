@@ -11,7 +11,7 @@ import mimetypes
 from gevent.server import StreamServer
 
 
-ROOT_DIR = '../webroot/'
+ROOT_DIR = '../webroot'
 
 
 class HTTPException(Exception):
@@ -28,11 +28,10 @@ HTTP_UNSUPPORTED_METHOD = '405 Method not allowed'
 
 def format_response(status_line, headers, content):
     """Building HTTP protocol-compliant response."""
-    return '{}\r\n{}\r\n\r\n{}\r\n'.format(
+    return '{}\r\n{}\r\n\r\n'.format(
         status_line,
-        format_headers(headers),
-        content
-    )
+        format_headers(headers)
+    ), content
 
 
 def format_headers(headers):
@@ -55,7 +54,7 @@ def response_error(code, reason):
     status_line = 'HTTP/1.1 {}'.format(code)
     content = '<h1>{}</h1>'.format(reason)
     headers = generate_headers(content, ('text/html', 'charset=UTF-8'))
-    return format_response(status_line, headers, content)
+    return format_response(status_line, headers, content.decode('utf8'))
 
 
 def split_head(request):
@@ -182,11 +181,12 @@ def handle_connection(conn, addr):
     print(message)
     try:
         uri = parse_request(message.decode())
-        response = response_ok(uri)
+        header, content = response_ok(uri)
+        print(type(header), isinstance(content, bytes))
     except HTTPException as e:
-        response = response_error(e.http_error, e.message)
-    print('responding with', response.encode('utf8'))
-    conn.sendall(response.encode('utf8'))
+        header, content = response_error(e.http_error, e.message)
+    print('responding with', header.encode('utf8'))
+    conn.sendall(header.encode('utf8') + content)
     conn.close()
 
 
