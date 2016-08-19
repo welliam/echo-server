@@ -4,6 +4,14 @@ from __future__ import unicode_literals
 import socket
 import string
 import utils
+import io
+import os
+import cgi
+import mimetypes
+from gevent.server import StreamServer
+
+
+ROOT_DIR = '../webroot'
 
 
 class HTTPException(Exception):
@@ -14,15 +22,15 @@ class HTTPException(Exception):
 
 
 HTTP_BAD_REQUEST = '400 Bad Request'
+HTTP_NOT_FOUND = '404 Not Found'
 HTTP_UNSUPPORTED_METHOD = '405 Method not allowed'
 
 
-def format_response(status_line, headers, content):
+def format_response(status_line, headers):
     """Building HTTP protocol-compliant response."""
-    return '{}\r\n{}\r\n\r\n{}\r\n'.format(
+    return '{}\r\n{}\r\n\r\n'.format(
         status_line,
-        format_headers(headers),
-        content
+        format_headers(headers)
     )
 
 
@@ -31,20 +39,22 @@ def format_headers(headers):
     return '\r\n'.join('{}: {}'.format(k, headers[k]) for k in headers)
 
 
-def response_ok():
+def response_ok(uri):
     """Returns formatted 200 response."""
+    verify_path(uri)
+    path = '{}{}'.format(ROOT_DIR, uri)
     status_line = 'HTTP/1.1 200 OK'
-    headers = {'Content-Type': 'text/html; charset=UTF-8'}
-    content = '<h1>Hello world!</h1>'
-    return format_response(status_line, headers, content)
+    content = path_content(path)
+    headers = generate_headers_from_path(path, content)
+    return format_response(status_line, headers), content
 
 
 def response_error(code, reason):
     """Returns formatted error response."""
     status_line = 'HTTP/1.1 {}'.format(code)
-    headers = {'Content-Type': 'text/html; charset=UTF-8'}
     content = '<h1>{}</h1>'.format(reason)
-    return format_response(status_line, headers, content)
+    headers = generate_headers(content, ('text/html', 'charset=UTF-8'))
+    return format_response(status_line, headers), content.encode('utf8')
 
 
 def split_head(request):
@@ -112,6 +122,58 @@ def parse_request(request):
     return uri
 
 
+def verify_path(path):
+    """Sanitize path"""
+    if '~' == path[0] or '//' in path or '..' in path:
+        raise HTTPException(HTTP_NOT_FOUND, 'File not found')
+
+
+def list_dir(path):
+    """Get files and dirs in dir"""
+    return format_dir(os.listdir(path))
+
+
+def format_dir(paths):
+    """Format to html"""
+    html_list = [
+        '<li><a href="{link}">{link}</a></li>'
+        .format(link=cgi.escape(f)) if '.' in f
+        else '<li><a href="{link}/">{link}</a></li>'
+        .format(link=cgi.escape(f)) for f in paths
+    ]
+    return '<ul>{}</ul>'.format(''.join(html_list))
+
+
+def path_content(path):
+    """Check if dir or file"""
+    if os.path.isdir(path):
+        return list_dir(path).encode('utf8')
+    elif os.path.isfile(path):
+        return io.open(path, 'rb').read()
+    else:
+        raise HTTPException(HTTP_NOT_FOUND, 'File not found')
+
+
+def generate_headers(content, mime_type):
+    """Input content length, type, encoding to header"""
+    mime, encoding = mime_type
+    headers = {
+        'Content-Length': len(content)
+    }
+    if mime:
+        headers['Content-Type'] = mime
+        if encoding:
+            headers['Content-Type'] += '; charset={}'.format(encoding)
+    else:
+        headers['Content-Type'] = 'text/html'
+    return headers
+
+
+def generate_headers_from_path(path, content):
+    """Return proper formatted header from requested path"""
+    return generate_headers(content, mimetypes.guess_type(path))
+
+
 def start_server():
     """Set up server socket."""
     server_socket = socket.socket(
@@ -125,25 +187,23 @@ def start_server():
     return server_socket
 
 
-def server(server_socket):
+def handle_connection(conn, addr):
+    """Determines what to send back as response."""
+    message = utils.recieve_message(conn)
+    try:
+        uri = parse_request(message.decode())
+        header, content = response_ok(uri)
+    except HTTPException as e:
+        header, content = response_error(e.http_error, e.message)
+    print(header)
+    conn.sendall(header.encode('utf8') + content)
+    conn.close()
+
+
+def server():
     """Set up client socket"""
-    while True:
-        conn, addr = server_socket.accept()
-        message = utils.recieve_message(conn)
-        print(message)
-        try:
-            parse_request(message.decode())
-            message = response_ok()
-        except HTTPException as e:
-            message = response_error(e.http_error, e.message)
-        print('responding with', message)
-        conn.sendall(message.encode('utf8'))
-        conn.close()
+    StreamServer(utils.address, handle_connection).serve_forever()
 
 
 if __name__ == '__main__':
-    server_socket = start_server()
-    try:
-        server(server_socket)
-    except KeyboardInterrupt:
-        server_socket.close()
+    server()
