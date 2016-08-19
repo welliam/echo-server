@@ -195,7 +195,7 @@ def handle_connection(conn, addr):
         header, content = response_ok(uri)
     except HTTPException as e:
         header, content = response_error(e.http_error, e.message)
-    print(header.encode('utf8') + content)
+    print(header)
     conn.sendall(header.encode('utf8') + content)
     conn.close()
 
